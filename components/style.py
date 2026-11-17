@@ -43,6 +43,11 @@ def apply_styles() -> None:
             min-height: 44px;
         }
         .st-key-geoterroir-evaluation [role="radiogroup"] label { margin-bottom: 0; }
+        .st-key-geoterroir-evaluation button[data-variant="segmented_control"][role="radio"][aria-checked="true"]:not(:disabled) {
+            background-color: #762c47;
+            border-color: #762c47;
+            color: #fff;
+        }
         [role="option"], [role="option"] * {
             white-space: normal;
             overflow-wrap: anywhere;
