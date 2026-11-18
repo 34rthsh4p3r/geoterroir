@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from unicodedata import combining, normalize
 from zoneinfo import ZoneInfo
 
 
@@ -35,17 +36,17 @@ SENSORY_QUESTIONS = (
 )
 
 AROMAS = {
-    "Florális": "akác, kamilla, bodza, rózsa, ibolya, virág",
-    "Zöld gyümölcs": "zöldalma, egres, körte, szőlő",
-    "Citrusféle": "citrom, lime, narancs, grapefruit",
-    "Csonthéjas": "őszibarack, sárgabarack, nektarin",
-    "Trópusi": "banán, licsi, mangó, dinnye, ananász, maracuja",
-    "Piros bogyós": "ribizli, vörösáfonya, málna, eper, meggy, cseresznye",
-    "Fekete bogyós": "feketeribizli, szeder, kékáfonya, kései meggy, szilva",
-    "Fűszeres": "fűszer, fekete bors, fehér bors, édesgyökér",
-    "Füves": "zöldpaprika, fű, paradicsomlevél, spárga, borsó",
-    "Gyógynövényes": "eukaliptusz, menta, édeskömény, kapor",
-    "Hordós": "pirítós, vaj, vanília, karamella, fa, füst stb.",
+    "florális": "akác, kamilla, bodza, rózsa, ibolya, virág",
+    "zöld gyümölcs": "zöldalma, egres, körte, szőlő",
+    "citrusféle": "citrom, lime, narancs, grapefruit",
+    "csonthéjas": "őszibarack, sárgabarack, nektarin",
+    "trópusi": "banán, licsi, mangó, dinnye, ananász, maracuja",
+    "piros bogyós": "ribizli, vörösáfonya, málna, eper, meggy, cseresznye",
+    "fekete bogyós": "feketeribizli, szeder, kékáfonya, kései meggy, szilva",
+    "fűszeres": "fűszer, fekete bors, fehér bors, édesgyökér",
+    "füves": "zöldpaprika, fű, paradicsomlevél, spárga, borsó",
+    "gyógynövényes": "eukaliptusz, menta, édeskömény, kapor",
+    "hordós": "pirítós, vaj, vanília, karamella, fa, füst stb.",
 }
 TECHNIQUES = ("Reduktív", "Oxidatív")
 BALANCES = ("Egyensúlyos", "Nem egyensúlyos")
@@ -53,21 +54,21 @@ BALANCES = ("Egyensúlyos", "Nem egyensúlyos")
 WHITE_VARIETIES = {
     "Illatos": (
         "Melyik illatos fajta lehet?",
-        ("Cserszegi Fűszeres", "Irsai Olivér", "Sauvignon Blanc", "Sárgamuskotály", "Tramini"),
+        ("Irsai Olivér", "Cserszegi Fűszeres", "Sárgamuskotály", "Tramini", "Sauvignon Blanc"),
     ),
     "Nem illatos": (
         "Melyik nem illatos fajta lehet?",
-        ("Chardonnay", "Furmint", "Hárslevelű", "Olaszrizling", "Rajnai Rizling"),
+        ("Furmint", "Hárslevelű", "Olaszrizling", "Rajnai Rizling", "Chardonnay"),
     ),
 }
 RED_VARIETIES = {
     "Világfajta": (
         "Melyik világfajta lehet?",
-        ("Cabernet Franc", "Cabernet Sauvignon", "Merlot", "Pinot Noir", "Syrah / Shiraz"),
+        ("Cabernet Sauvignon", "Cabernet Franc", "Merlot", "Pinot Noir", "Syrah / Shiraz"),
     ),
     "Kárpát-medencei": (
         "Melyik Kárpát-medencei fajta lehet?",
-        ("Bikavér", "Feketeleányka", "Kékfrankos", "Kadarka", "Portugieser"),
+        ("Kékfrankos", "Kadarka", "Portugieser", "Feketeleányka", "Bikavér"),
     ),
 }
 REGIONS = (
@@ -103,7 +104,7 @@ SCORES = {
     6: ("Jó", "jó ivású, kellemes mindennapi bor, hozza a fajtajellegeket"),
     7: ("Nagyon jó", "komolyabb szerkezetű bor, szép egyensúllyal"),
     8: ("Kiváló", "kiemelkedő minőség, remek egyensúly és egyedi karakter"),
-    9: ("Kivételes", "izgalmas és emlékezetes bor, tökéletes harmónia"),
+    9: ("Kivételes / Csúcsbor", "izgalmas és emlékezetes bor, tökéletes harmónia"),
     10: ("Tökéletes", "hibátlan, felejthetetlen élményt nyújtó ikonikus bor"),
 }
 
@@ -113,6 +114,11 @@ def lot_label(lot: int | None, lots: dict[int, WineLot]) -> str:
         return "Összes tétel"
     entry = lots[lot]
     return f"{entry.name} ({entry.wine_type.lower()})"
+
+
+def alphabetical_key(text: str) -> str:
+    return "".join(character for character in normalize("NFKD", text.casefold())
+                   if not combining(character) and character.isalnum())
 
 
 def variety_branch(wine_type: str):
