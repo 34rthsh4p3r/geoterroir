@@ -10,12 +10,15 @@ def apply_styles() -> None:
         .st-key-geoterroir-admin { max-width: 76rem; margin-inline: auto; }
         .dg-admin-brand {
             display: block;
-            padding: 0 0 .5rem;
-            border-bottom: 1px solid #e4dadc;
+            padding: 0;
             color: #9f1916;
             font-size: 1.15rem;
             font-weight: 700;
             text-decoration: none;
+        }
+        .st-key-dg-admin-header {
+            padding-bottom: .5rem;
+            border-bottom: 1px solid #e4dadc;
         }
         .st-key-geoterroir-admin h1 {
             padding: 0;
@@ -41,11 +44,13 @@ def apply_styles() -> None:
         .st-key-geoterroir-evaluation [role="radiogroup"] label,
         .st-key-geoterroir-evaluation [role="combobox"],
         .st-key-geoterroir-evaluation button,
+        .st-key-dg-admin-navigation button,
         .st-key-geoterroir-login button {
             min-height: 44px;
         }
         .st-key-geoterroir-evaluation [role="radiogroup"] label { margin-bottom: 0; }
-        .st-key-geoterroir-evaluation button[data-variant="segmented_control"][role="radio"][aria-checked="true"]:not(:disabled) {
+        .st-key-geoterroir-evaluation button[data-variant="segmented_control"][role="radio"][aria-checked="true"]:not(:disabled),
+        .st-key-dg-admin-navigation button[data-variant="segmented_control"][role="radio"][aria-checked="true"]:not(:disabled) {
             background-color: #9f1916;
             border-color: #9f1916;
             color: #fff;
