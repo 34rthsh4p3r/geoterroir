@@ -10,7 +10,7 @@ from database.settings import submission_store
 from utils.constants import (
     AROMAS, AROMA_QUESTION, BALANCES, BALANCE_QUESTION, LOTS, LOT_QUESTION,
     REGIONS, REGION_QUESTION, SCORES, SCORE_QUESTION, SENSORY_QUESTIONS, TECHNIQUES,
-    TECHNIQUE_QUESTION, lot_label, sensory_questions, variety_branch,
+    TECHNIQUE_QUESTION, sensory_questions, variety_branch,
 )
 from utils.rate_limit import SUBMISSION_LIMIT
 from utils.validation import Evaluation, InvalidEvaluation, validate_evaluation
@@ -80,9 +80,6 @@ def score_choice() -> int | None:
             title, description = SCORES[score]
             st.html(f'<p class="geoterroir-score"><strong>{score}. {escape(title)}</strong> '
                     f'({escape(description)})</p>')
-        with st.expander("A teljes értékelési skála"):
-            st.markdown("\n\n".join(f"**{point}. {title}** ({description})"
-                                     for point, (title, description) in SCORES.items()))
         return score
 
 
@@ -128,7 +125,7 @@ def render_answers(evaluation: Evaluation) -> None:
     balance = (BALANCE_QUESTION, evaluation.balance)
     region_and_balance = (region, balance) if field == "fragrance" else (balance, region)
     answers = [
-        (LOT_QUESTION, lot_label(evaluation.lot, LOTS)),
+        (LOT_QUESTION, str(evaluation.lot)),
         (AROMA_QUESTION, ", ".join(evaluation.aromas)),
         *((label, getattr(evaluation, name)) for name, label, _ in sensory_questions(evaluation.wine_type)),
         (TECHNIQUE_QUESTION, evaluation.technique),
@@ -172,11 +169,9 @@ def render_evaluation() -> None:
             if st.session_state.get("wine_lot") not in (None, *LOTS):
                 st.session_state.pop("wine_lot", None)
             lot = st.segmented_control(
-                LOT_QUESTION, tuple(LOTS), format_func=lambda value: LOTS[value].name,
-                key="wine_lot", required=True, width="stretch", wrap=True, on_change=clear_answers,
+                LOT_QUESTION, tuple(LOTS), format_func=str,
+                key="wine_lot", required=True, width="stretch", wrap=False, on_change=clear_answers,
             )
-            if lot is not None:
-                st.caption(LOTS[lot].wine_type)
         if lot is None:
             return
 
