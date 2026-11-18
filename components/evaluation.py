@@ -10,7 +10,7 @@ from database.settings import submission_store
 from utils.constants import (
     AROMAS, AROMA_QUESTION, BALANCES, BALANCE_QUESTION, LOTS, LOT_QUESTION,
     REGIONS, REGION_QUESTION, SCORES, SCORE_QUESTION, SENSORY_QUESTIONS, TECHNIQUES,
-    TECHNIQUE_QUESTION, sensory_questions, variety_branch,
+    TECHNIQUE_QUESTION, alphabetical_key, sensory_questions, variety_branch,
 )
 from utils.rate_limit import SUBMISSION_LIMIT
 from utils.validation import Evaluation, InvalidEvaluation, validate_evaluation
@@ -126,7 +126,7 @@ def render_answers(evaluation: Evaluation) -> None:
     region_and_balance = (region, balance) if field == "fragrance" else (balance, region)
     answers = [
         (LOT_QUESTION, str(evaluation.lot)),
-        (AROMA_QUESTION, ", ".join(evaluation.aromas)),
+        (AROMA_QUESTION, ", ".join(name.capitalize() for name in evaluation.aromas)),
         *((label, getattr(evaluation, name)) for name, label, _ in sensory_questions(evaluation.wine_type)),
         (TECHNIQUE_QUESTION, evaluation.technique),
         (branch_question, branch),
@@ -176,11 +176,11 @@ def render_evaluation() -> None:
             return
 
         with question_card("aromas"):
-            st.multiselect(AROMA_QUESTION, tuple(AROMAS), key=answer_key("aromas"),
+            st.multiselect(AROMA_QUESTION, tuple(AROMAS), format_func=str.capitalize, key=answer_key("aromas"),
                            placeholder="Egy vagy több aromacsoport…", filter_mode=None, select_all=False,
                            on_change="ignore")
             with st.expander("Aromacsoportok részletesen"):
-                st.markdown("\n\n".join(f"**{name}** ({notes})" for name, notes in AROMAS.items()))
+                st.markdown("\n\n".join(f"**{name.capitalize()}** ({notes})" for name, notes in AROMAS.items()))
         wine_type = LOTS[lot].wine_type
         for name, label, options in sensory_questions(wine_type):
             button_choice(label, options, name)
@@ -190,7 +190,7 @@ def render_evaluation() -> None:
         branch = button_choice(question, varieties, field, on_change=clear_grape)
         if branch is not None:
             grape_question, grapes = varieties[branch]
-            dropdown_choice(grape_question, grapes, "grape")
+            dropdown_choice(grape_question, sorted(grapes, key=alphabetical_key), "grape")
 
         if field == "fragrance":
             region_choice()
