@@ -54,10 +54,10 @@ def question_card(name: str):
 def dropdown_choice(label: str, options, name: str, *, placeholder: str = "Válassz…"):
     with question_card(name):
         return st.selectbox(label, tuple(options), index=None, key=answer_key(name),
-                            placeholder=placeholder, filter_mode=None)
+                            placeholder=placeholder, filter_mode=None, on_change="ignore")
 
 
-def button_choice(label: str, options, name: str, *, on_change=None):
+def button_choice(label: str, options, name: str, *, on_change="ignore"):
     with question_card(name):
         return st.segmented_control(
             label, tuple(options), key=answer_key(name), required=True,
@@ -69,10 +69,13 @@ def region_choice() -> str | None:
     return dropdown_choice(REGION_QUESTION, REGIONS, "region", placeholder="Válassz borvidéket…")
 
 
+@st.fragment
 def score_choice() -> int | None:
     with question_card("score"):
-        score = st.selectbox(SCORE_QUESTION, tuple(SCORES), index=None, key=answer_key("score"),
-                             placeholder="Válassz 1 és 10 pont között…", filter_mode=None)
+        score = st.segmented_control(
+            SCORE_QUESTION, tuple(SCORES), key=answer_key("score"), required=True,
+            width="stretch", wrap=True,
+        )
         if score is not None:
             title, description = SCORES[score]
             st.html(f'<p class="geoterroir-score"><strong>{score}. {escape(title)}</strong> '
@@ -168,15 +171,19 @@ def render_evaluation() -> None:
         with question_card("lot"):
             if st.session_state.get("wine_lot") not in (None, *LOTS):
                 st.session_state.pop("wine_lot", None)
-            lot = st.selectbox(LOT_QUESTION, tuple(LOTS), index=None, format_func=lambda value: lot_label(value, LOTS),
-                               key="wine_lot", placeholder="Válassz tételt…", filter_mode=None,
-                               on_change=clear_answers)
+            lot = st.segmented_control(
+                LOT_QUESTION, tuple(LOTS), format_func=lambda value: LOTS[value].name,
+                key="wine_lot", required=True, width="stretch", wrap=True, on_change=clear_answers,
+            )
+            if lot is not None:
+                st.caption(LOTS[lot].wine_type)
         if lot is None:
             return
 
         with question_card("aromas"):
             st.multiselect(AROMA_QUESTION, tuple(AROMAS), key=answer_key("aromas"),
-                           placeholder="Egy vagy több aromacsoport…", filter_mode=None, select_all=False)
+                           placeholder="Egy vagy több aromacsoport…", filter_mode=None, select_all=False,
+                           on_change="ignore")
             with st.expander("Aromacsoportok részletesen"):
                 st.markdown("\n\n".join(f"**{name}** ({notes})" for name, notes in AROMAS.items()))
         wine_type = LOTS[lot].wine_type
