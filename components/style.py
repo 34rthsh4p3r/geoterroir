@@ -48,6 +48,27 @@ def apply_styles() -> None:
             border-color: #762c47;
             color: #fff;
         }
+        @media (max-width: 640px) {
+            .st-key-question-score [role="radiogroup"] {
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                row-gap: .4rem;
+            }
+            .st-key-question-score button[role="radio"] {
+                width: 100%;
+                min-width: 0;
+                margin-inline: 0;
+                padding-inline: .25rem;
+            }
+            .st-key-question-score button[role="radio"]:nth-child(5) {
+                border-start-end-radius: .65rem;
+                border-end-end-radius: .65rem;
+            }
+            .st-key-question-score button[role="radio"]:nth-child(6) {
+                border-start-start-radius: .65rem;
+                border-end-start-radius: .65rem;
+            }
+        }
         [role="option"], [role="option"] * {
             white-space: normal;
             overflow-wrap: anywhere;
