@@ -29,8 +29,8 @@ def apply_styles() -> None:
             border-radius: .75rem;
         }
         .st-key-dg-lot-buttons button { min-height: 44px; }
-        .st-key-dg-card-active { text-align: center; }
-        .st-key-dg-card-active label { display: flex; justify-content: center; }
+        .st-key-dg-card-active, .st-key-dg-card-total { text-align: center; }
+        .st-key-dg-card-active label, .st-key-dg-card-total label { display: flex; justify-content: center; }
         .st-key-geoterroir-evaluation [class*="st-key-question-"] {
             background: #fffdfa;
             border-radius: .65rem;
