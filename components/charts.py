@@ -1,4 +1,3 @@
-from base64 import b64encode
 from html import escape
 
 import plotly.graph_objects as go
@@ -70,12 +69,7 @@ def ranking_chart(title: str, counts: dict, *, respondent_count: int = 0, sort_b
             f'<strong>{count}</strong></li>'
         )
 
-    visible = f'<ul class="dg-ranking">{"".join(entries[:5])}</ul>'
-    more = ""
-    if len(entries) > 5:
-        more = (f'<details class="dg-rank-more"><summary>További válaszok</summary>'
-                f'<ul class="dg-ranking">{"".join(entries[5:])}</ul></details>')
-    return f"{heading}{visible}{more}"
+    return f'{heading}<ul class="dg-ranking">{"".join(entries)}</ul>'
 
 
 def sensory_charts(records: list[dict], wine_type: str) -> None:
@@ -87,42 +81,32 @@ def sensory_charts(records: list[dict], wine_type: str) -> None:
     st.html(f'<div class="dg-sensory-charts">{"".join(cards)}</div>')
 
 
-def donut(description: str, records: list[dict], field: str, options) -> None:
+def split_bar(description: str, records: list[dict], field: str, options) -> None:
     counts = answer_counts(records, field)
     values = [counts[label] for label in options]
     total = sum(values)
-    arcs, legend = [], []
-    offset = 0.0
-    gap = 5 if sum(bool(value) for value in values) > 1 else 0
+    segments, legend, summaries = [], [], []
     for label, value, color in zip(options, values, leading_colors(values)):
         label = escape(label)
         share = value / total * 100 if total else 0
+        summary = f"{label} · {value} válasz · {percent_label(share)}"
+        summaries.append(summary)
         if value:
-            length = max(0.01, share - gap)
-            arcs.append(
-                f'<circle cx="60" cy="60" r="45" pathLength="100" stroke="{color}" '
-                f'stroke-dasharray="{length:.3f} {100-length:.3f}" '
-                f'stroke-dashoffset="{-offset-gap/2:.3f}" transform="rotate(-90 60 60)"/>'
+            segments.append(
+                f'<span class="geoterroir-split-segment" title="{summary}" '
+                f'style="width:{share:.6f}%;background:{color}"></span>'
             )
-            offset += share
         legend.append(
             f'<li><span class="geoterroir-swatch" style="background:{color}"></span>'
             f'<span>{label}</span><strong>{percent_label(share)} <small>({value})</small></strong></li>'
         )
 
-    leader = percent_label(100 * max(values) / total) if total else "–"
-    svg = (
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" '
-        f'fill="none" stroke-width="10" stroke-linecap="round">'
-        f'<circle cx="60" cy="60" r="45" stroke="#EEE8EB"/>{"".join(arcs)}'
-        f'<text x="60" y="65" text-anchor="middle" fill="#30232B" font-family="sans-serif" '
-        f'font-size="20" font-weight="700">{leader}</text></svg>'
-    )
-    source = b64encode(svg.encode("utf-8")).decode("ascii")
+    empty = '<p class="dg-chart-empty">Még nincs válasz.</p>' if not total else ""
     st.html(
-        f'<section class="geoterroir-ring">'
-        f'<img src="data:image/svg+xml;base64,{source}" alt="{escape(description)} · {total} válasz · {leader}">'
-        f'<ul>{"".join(legend)}</ul></section>'
+        f'<section class="geoterroir-split">'
+        f'<div class="geoterroir-split-track" role="img" '
+        f'aria-label="{escape(description)}. {". ".join(summaries)}">{"".join(segments)}</div>'
+        f'{empty}<ul>{"".join(legend)}</ul></section>'
     )
 
 
@@ -186,14 +170,14 @@ def render_charts(records: list[dict], lot: int, averages: dict[int, tuple[float
     sensory_charts(records, wine_type)
     first, second, third = st.columns(3, gap="small")
     with first, st.container(border=True, key="dg-card-technique"):
-        donut("Borkészítési technológia", records, "technique", TECHNIQUES)
+        split_bar("Borkészítési technológia", records, "technique", TECHNIQUES)
     with second, st.container(border=True, key="dg-card-balance"):
-        donut("Egyensúly", records, "balance", BALANCES)
+        split_bar("Egyensúly", records, "balance", BALANCES)
     with third, st.container(border=True, key="dg-card-branch"):
         if wine_type == "Fehérbor":
-            donut("Illatosság · fehérborok", records, "fragrance", WHITE_VARIETIES)
+            split_bar("Illatosság · fehérborok", records, "fragrance", WHITE_VARIETIES)
         else:
-            donut("Fajtacsoport · vörösborok", records, "variety_group", RED_VARIETIES)
+            split_bar("Fajtacsoport · vörösborok", records, "variety_group", RED_VARIETIES)
 
     scores, comparison = st.columns(2, gap="small")
     with scores, st.container(border=True, key="dg-card-scores"):
