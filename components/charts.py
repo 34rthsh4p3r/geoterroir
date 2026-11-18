@@ -7,7 +7,7 @@ from utils.aggregates import answer_counts, aroma_counts, decimal_label
 from utils.constants import BALANCES, LOTS, RED_VARIETIES, SCORES, TECHNIQUES, WHITE_VARIETIES, sensory_questions
 
 
-BURGUNDY = "#762C47"
+BURGUNDY = "#9F1916"
 GRAY = "#A6A0A4"
 
 
@@ -16,9 +16,8 @@ def leading_colors(values) -> list[str]:
     return [BURGUNDY if highest > 0 and value == highest else GRAY for value in values]
 
 
-def chart_title(title: str, caption: str) -> str:
-    return (f'<h3 class="geoterroir-chart-title">{escape(title)}</h3>'
-            f'<p class="dg-chart-caption">{escape(caption)}</p>')
+def chart_title(title: str) -> str:
+    return f'<h3 class="geoterroir-chart-title">{escape(title)}</h3>'
 
 
 def percent_label(share: float) -> str:
@@ -52,7 +51,7 @@ def ranking_chart(title: str, counts: dict, *, respondent_count: int = 0, sort_b
     if sort_by_count:
         items.sort(key=lambda item: -item[1])
     maximum = max(counts.values(), default=0)
-    heading = chart_title(title, "Válaszok száma")
+    heading = chart_title(title)
     if not maximum:
         return f'{heading}<p class="dg-chart-empty">Még nincs válasz.</p>'
 
@@ -111,7 +110,7 @@ def split_bar(description: str, records: list[dict], field: str, options) -> Non
 
 
 def scores_chart(records: list[dict]) -> None:
-    st.html(chart_title("Pontszámok", "Értékelések száma pontszámonként"))
+    st.html(chart_title("Pontszámok"))
     counts = answer_counts(records, "score")
     values = [counts[score] for score in SCORES]
     maximum = max(values)
@@ -136,7 +135,7 @@ def scores_chart(records: list[dict]) -> None:
 
 
 def comparison_chart(averages: dict[int, tuple[float, int]]) -> None:
-    st.html(chart_title("Átlagpontszám tételenként", "Mind az öt tétel · 10 pontos skála"))
+    st.html(chart_title("Átlagpontszám tételenként"))
     scores = [averages.get(number, (None, 0)) for number in LOTS]
     values = [average for average, _ in scores]
     formatted = [decimal_label(average) for average in values]
