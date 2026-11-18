@@ -166,11 +166,14 @@ def comparison_chart(averages: dict[int, tuple[float, int]]) -> None:
     plot(figure, "chart-lot-comparison")
 
 
-def render_charts(records: list[dict], lot: int, averages: dict[int, tuple[float, int]]) -> None:
+def render_charts(records: list[dict], lot: int, averages: dict[int, tuple[float, int]], total: int) -> None:
     wine_type = LOTS[lot].wine_type
     active, scores, comparison = st.columns([1, 2, 2], gap="small")
-    with active, st.container(border=True, key="dg-card-active", height="stretch", vertical_alignment="center"):
-        st.metric("Aktív értékelések", len(records))
+    with active:
+        with st.container(border=True, key="dg-card-total"):
+            st.metric("Összes értékelés", total)
+        with st.container(border=True, key="dg-card-active"):
+            st.metric("Aktív értékelések", len(records))
     with scores, st.container(border=True, key="dg-card-scores"):
         scores_chart(records)
     with comparison, st.container(border=True, key="dg-card-comparison"):
