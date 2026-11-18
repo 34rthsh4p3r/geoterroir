@@ -4,7 +4,9 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from utils.aggregates import answer_counts, aroma_counts, decimal_label
-from utils.constants import BALANCES, LOTS, RED_VARIETIES, SCORES, TECHNIQUES, WHITE_VARIETIES, sensory_questions
+from utils.constants import (
+    BALANCES, LOTS, RED_VARIETIES, SCORES, TECHNIQUES, WHITE_VARIETIES, alphabetical_key, sensory_questions,
+)
 
 
 BURGUNDY = "#9F1916"
@@ -166,6 +168,14 @@ def comparison_chart(averages: dict[int, tuple[float, int]]) -> None:
 
 def render_charts(records: list[dict], lot: int, averages: dict[int, tuple[float, int]]) -> None:
     wine_type = LOTS[lot].wine_type
+    active, scores, comparison = st.columns([1, 2, 2], gap="small")
+    with active, st.container(border=True, key="dg-card-active", height="stretch", vertical_alignment="center"):
+        st.metric("Aktív értékelések", len(records))
+    with scores, st.container(border=True, key="dg-card-scores"):
+        scores_chart(records)
+    with comparison, st.container(border=True, key="dg-card-comparison"):
+        comparison_chart(averages)
+
     sensory_charts(records, wine_type)
     first, second, third = st.columns(3, gap="small")
     with first, st.container(border=True, key="dg-card-technique"):
@@ -178,16 +188,13 @@ def render_charts(records: list[dict], lot: int, averages: dict[int, tuple[float
         else:
             split_bar("Fajtacsoport · vörösborok", records, "variety_group", RED_VARIETIES)
 
-    scores, comparison = st.columns(2, gap="small")
-    with scores, st.container(border=True, key="dg-card-scores"):
-        scores_chart(records)
-    with comparison, st.container(border=True, key="dg-card-comparison"):
-        comparison_chart(averages)
-
     aromas, grapes, regions = st.columns(3, gap="small")
     with aromas, st.container(border=True, key="dg-card-aromas"):
-        st.html(ranking_chart("Aromacsoportok", aroma_counts(records), respondent_count=len(records)))
+        counts = {name.capitalize(): count for name, count in aroma_counts(records).items()}
+        st.html(ranking_chart("Aromacsoportok", counts, respondent_count=len(records)))
     with grapes, st.container(border=True, key="dg-card-grapes"):
-        st.html(ranking_chart("Szőlőfajták", answer_counts(records, "grape")))
+        counts = answer_counts(records, "grape")
+        ordered = {name: counts[name] for name in sorted(counts, key=alphabetical_key)}
+        st.html(ranking_chart("Szőlőfajták", ordered, sort_by_count=False))
     with regions, st.container(border=True, key="dg-card-regions"):
         st.html(ranking_chart("Borvidékek", answer_counts(records, "region")))
