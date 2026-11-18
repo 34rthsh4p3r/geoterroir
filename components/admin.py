@@ -13,7 +13,7 @@ from utils.export import csv_bytes, excel_bytes, export_filename, legacy_votes_f
 from utils.rate_limit import LOGIN_LIMIT
 
 
-TITLE = "GEOTerroir – Adminisztráció"
+TITLE = "GeoTerroir – Admin"
 ADMIN_PASSWORD = "admin26"
 PAGE_SIZE = 100
 ARCHIVE_SUCCESS = (
