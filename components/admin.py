@@ -183,10 +183,11 @@ def render_live_charts(store: ResultsStore, lot: int) -> None:
         return
     try:
         active, averages = store.chart_data(lot)
+        total, _ = store.counts(lot)
     except DatabaseError:
         st.error("Az eredmények most nem tölthetők be.")
         return
-    render_charts(active, lot, averages)
+    render_charts(active, lot, averages, total)
 
 
 @st.dialog("Szavazatok törlése", dismissible=False)
