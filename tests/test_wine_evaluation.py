@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from threading import Barrier
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -120,29 +121,47 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(len(self.store.records(6)), 1)
 
 
+    def test_120_simultaneous_submissions_preserve_each_participant(self):
+        initialize_sqlite(self.path)
+        start = Barrier(120)
+        identifiers = [uuid4() for _ in range(120)]
+
+        def submit(identifier):
+            start.wait(timeout=15)
+            self.submissions.save(identifier, validate_evaluation(1, WHITE_ANSWERS))
+
+        with ThreadPoolExecutor(max_workers=120) as executor:
+            list(executor.map(submit, identifiers))
+
+        records = self.store.records(1)
+        self.assertEqual({record["id"] for record in records}, {str(value) for value in identifiers})
+        self.assertEqual(self.store.counts(1), (120, 120))
+        self.assertEqual(len(self.store.chart_data(1)[0]), 120)
+
+
 class InterfaceTests(unittest.TestCase):
     def setUp(self):
         self.path = Path(self.enterContext(TemporaryDirectory())) / "wine_votes.db"
         self.enterContext(patch.object(settings, "DB_PATH", self.path))
-        self.app = AppTest.from_string("from bor_kostolo_design1 import main\nmain()", default_timeout=15)
+        self.app = AppTest.from_string("from app import main\nmain()", default_timeout=15)
 
     def test_logo_only_header_short_aromas_and_conditional_fields(self):
         self.app.run()
         self.assertFalse(self.app.title)
         self.assertTrue(self.app.get("image"))
         self.assertFalse(any("Adminisztráció" in element.value for element in self.app.markdown))
-        self.assertEqual(self.app.selectbox(key="wine_lot").options, [
-            "1. tétel (fehérbor)", "2. tétel (fehérbor)", "3. tétel (fehérbor)",
-            "4. tétel (vörösbor)", "5. tétel (vörösbor)",
-        ])
-        self.app.selectbox(key="wine_lot").set_value(1).run()
-        self.assertEqual(answer(self.app.multiselect, "aromas").options, list(AROMAS))
+        self.assertEqual(self.app.segmented_control(key="wine_lot").options,
+                         [str(number) for number in range(1, 6)])
+        self.app.segmented_control(key="wine_lot").set_value(1).run()
+        self.assertEqual(answer(self.app.multiselect, "aromas").options, [name.capitalize() for name in AROMAS])
         buttons = self.app.segmented_control
         self.assertEqual([widget.proto.label for widget in buttons], [
+            "Válaszd ki az értékelni kívánt tételt!",
             "Édesség", "Savasság", "Alkohol", "Lecsengés", "Reduktív vagy oxidatív volt a borkészítés?",
-            "Illatos vagy nem illatos?", "Egyensúlyos vagy nem egyensúlyos?",
+            "Illatos vagy nem illatos?", "Egyensúlyos vagy nem egyensúlyos?", "Értékelje a bort az ízlése szerint:",
         ])
-        self.assertTrue(all(widget.value is None for widget in buttons))
+        self.assertTrue(all(widget.value is None for widget in buttons if widget.key != "wine_lot"))
+        self.assertEqual(answer(buttons, "score").options, [str(point) for point in range(1, 11)])
         self.assertEqual(answer(buttons, "sweetness").options, ["száraz", "félszáraz", "félédes", "édes"])
         self.assertFalse(self.app.radio)
         self.assertFalse(self.app.text_input)
@@ -153,11 +172,12 @@ class InterfaceTests(unittest.TestCase):
         answer(self.app.selectbox, "grape").set_value("Irsai Olivér").run()
         answer(self.app.segmented_control, "fragrance").set_value("Nem illatos").run()
         self.assertIsNone(answer(self.app.selectbox, "grape").value)
-        self.app.selectbox(key="wine_lot").set_value(4).run()
+        self.app.segmented_control(key="wine_lot").set_value(4).run()
         buttons = self.app.segmented_control
         self.assertEqual([widget.proto.label for widget in buttons], [
+            "Válaszd ki az értékelni kívánt tételt!",
             "Édesség", "Savasság", "Alkohol", "Tannin", "Lecsengés", "Reduktív vagy oxidatív volt a borkészítés?",
-            "Világfajta vagy Kárpát-medencei?", "Egyensúlyos vagy nem egyensúlyos?",
+            "Világfajta vagy Kárpát-medencei?", "Egyensúlyos vagy nem egyensúlyos?", "Értékelje a bort az ízlése szerint:",
         ])
         self.assertEqual(answer(buttons, "tannin").options, ["alacsony", "közepes", "magas"])
         answer(buttons, "variety_group").set_value("Világfajta").run()
@@ -168,7 +188,7 @@ class InterfaceTests(unittest.TestCase):
 
     def test_submission_requires_filled_form_and_saves_one_record(self):
         self.app.run()
-        self.app.selectbox(key="wine_lot").set_value(1).run()
+        self.app.segmented_control(key="wine_lot").set_value(1).run()
         self.app.button(key="wine_submit").click().run()
         self.assertIn("Töltsd ki", self.app.error[0].value)
         self.assertIn("Édesség, Savasság, Alkohol, Lecsengés", self.app.error[0].value)
@@ -178,15 +198,15 @@ class InterfaceTests(unittest.TestCase):
         answer(self.app.segmented_control, "fragrance").set_value("Illatos").run()
         answer(self.app.selectbox, "grape").set_value("Irsai Olivér")
         answer(self.app.selectbox, "region").set_value("Tokaji borvidék")
-        answer(self.app.selectbox, "score").set_value(8).run()
+        answer(self.app.segmented_control, "score").set_value(8).run()
         self.assertFalse(ResultsStore(Database(self.path)).records(None))
         self.app.button(key="wine_submit").click().run()
         self.assertIn("sikeresen rögzítettük", self.app.success[0].value)
         self.assertEqual(self.app.subheader[0].value, "A válaszaid")
         summary = self.app.markdown[0].value
         for question, value in (
-            ("Válaszd ki az értékelni kívánt tételt!", "1. tétel (fehérbor)"),
-            ("Jellemző aromacsoportok", "florális, citrusféle"),
+            ("Válaszd ki az értékelni kívánt tételt!", "1"),
+            ("Jellemző aromacsoportok", "Florális, Citrusféle"),
             ("Édesség", "száraz"),
             ("Savasság", "magas"),
             ("Alkohol", "alacsony"),
@@ -204,7 +224,7 @@ class InterfaceTests(unittest.TestCase):
         self.assertIsNone(record["tannin"])
         self.assertIsNone(record["variety_group"])
         self.app.button[0].click().run()
-        self.assertIsNone(self.app.selectbox(key="wine_lot").value)
+        self.assertIsNone(self.app.segmented_control(key="wine_lot").value)
         self.assertFalse(self.app.subheader)
 
     def test_admin_query_requires_the_exact_password(self):
@@ -253,6 +273,16 @@ class InterfaceTests(unittest.TestCase):
                       if '<div class="dg-sensory-charts">' in element.proto.body)
         self.assertLess(charts.index(">Tannin<"), charts.index(">Lecsengés<"))
         self.assertIn('title="közepes · 1 válasz"', charts)
+
+        self.app.segmented_control(key="admin_section").set_value("Értékelések").run()
+        self.assertFalse(self.app.exception)
+        self.assertEqual(len(self.app.dataframe), 1)
+        self.app.segmented_control(key="admin_section").set_value("Exportálás").run()
+        self.assertFalse(self.app.exception)
+        self.assertTrue(self.app.selectbox(key="admin_export_scope"))
+        self.app.segmented_control(key="admin_section").set_value("Archiválás").run()
+        self.assertFalse(self.app.exception)
+        self.assertTrue(self.app.button(key="admin_archive"))
 
 
 class ValidationTests(unittest.TestCase):
