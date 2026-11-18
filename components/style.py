@@ -26,6 +26,8 @@ def apply_styles() -> None:
             border-radius: .75rem;
         }
         .st-key-dg-lot-buttons button { min-height: 44px; }
+        .st-key-dg-card-active { text-align: center; }
+        .st-key-dg-card-active label { display: flex; justify-content: center; }
         .st-key-geoterroir-evaluation [class*="st-key-question-"] {
             background: #fffdfa;
             border-radius: .65rem;
@@ -106,8 +108,6 @@ def apply_styles() -> None:
         .dg-ranking strong { min-width: 1.6em; text-align: right; font-variant-numeric: tabular-nums; }
         .dg-rank-track, .dg-rank-track i { display: block; height: .5rem; border-radius: 1rem; }
         .dg-rank-track { background: #eee8eb; }
-        .dg-rank-more { margin-top: .55rem; font-size: .8rem; color: #635760; }
-        .dg-rank-more summary { cursor: pointer; }
         .dg-sensory-charts {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
@@ -122,15 +122,18 @@ def apply_styles() -> None:
         .dg-sensory-card .dg-ranking li {
             grid-template-columns: 4.1rem minmax(0, 1fr) auto;
         }
-        .geoterroir-ring img {
-            width: 6.1rem;
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto .35rem;
+        .geoterroir-split-track {
+            display: flex;
+            height: .9rem;
+            overflow: hidden;
+            border-radius: 1rem;
+            background: #eee8eb;
+            margin-block: .45rem .8rem;
         }
-        .geoterroir-ring ul { list-style: none; max-width: 17rem; margin: .15rem auto 0; padding: 0; }
-        .geoterroir-ring li {
+        .geoterroir-split-segment { flex-shrink: 0; box-sizing: border-box; }
+        .geoterroir-split-segment + .geoterroir-split-segment { border-inline-start: 2px solid #fffdfa; }
+        .geoterroir-split ul { list-style: none; margin: .15rem 0 0; padding: 0; }
+        .geoterroir-split li {
             display: grid;
             grid-template-columns: .55rem minmax(0, 1fr) auto;
             align-items: center;
@@ -138,8 +141,8 @@ def apply_styles() -> None:
             padding: .15rem 0;
             font-size: .83rem;
         }
-        .geoterroir-ring li strong { white-space: nowrap; }
-        .geoterroir-ring li small { color: #635760; font-weight: 400; }
+        .geoterroir-split li strong { white-space: nowrap; }
+        .geoterroir-split li small { color: #635760; font-weight: 400; }
         .geoterroir-swatch { width: .52rem; height: .52rem; border-radius: 50%; }
         .geoterroir-score {
             border-left: .2rem solid #762c47;
