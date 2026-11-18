@@ -13,9 +13,11 @@ from utils.export import csv_bytes, excel_bytes, export_filename, legacy_votes_f
 from utils.rate_limit import LOGIN_LIMIT
 
 
-TITLE = "GeoTerroir – Admin"
+TITLE = "GeoTerroir Kutatócsoport – Adminisztráció"
 ADMIN_PASSWORD = "admin26"
 PAGE_SIZE = 100
+REFRESH_SECONDS = 10
+SECTIONS = ("Diagramok", "Értékelések", "Exportálás", "Archiválás")
 ARCHIVE_SUCCESS = (
     "A szavazatokat eltávolítottuk az aktuális diagramokból. "
     "Az archivált válaszok továbbra is elérhetők az exportálható adatbázisban."
@@ -60,18 +62,6 @@ def logout() -> None:
     clear_prepared_export()
 
 
-@st.fragment(run_every=3)
-def render_active_count(store: ResultsStore, lot: int) -> None:
-    if not st.session_state.get("admin_authenticated"):
-        return
-    try:
-        _, active = store.counts(lot)
-    except DatabaseError:
-        active = "–"
-    with st.container(border=True, key="dg-card-active"):
-        st.metric("Aktív értékelések", active)
-
-
 def select_lot(number: int) -> None:
     st.session_state.admin_lot = number
     for key in ("admin_table_scope", "admin_export_scope", "admin_archive_scope"):
@@ -80,11 +70,8 @@ def select_lot(number: int) -> None:
     clear_prepared_export()
 
 
-def render_lot_bar(store: ResultsStore, lot: int) -> None:
-    summary, chooser = st.columns([1.15, 4.85], gap="small", vertical_alignment="center")
-    with summary:
-        render_active_count(store, lot)
-    with chooser, st.container(horizontal=True, gap="small", key="dg-lot-buttons"):
+def render_lot_bar(lot: int) -> None:
+    with st.container(horizontal=True, gap="small", key="dg-lot-buttons"):
         for number, entry in LOTS.items():
             st.button(entry.name, key=f"dg-lot-{number}", type="primary" if number == lot else "secondary",
                       width=112, on_click=select_lot, args=(number,))
@@ -126,6 +113,20 @@ def render_table(store: ResultsStore, lot: int | None, history_count: int, activ
     st.dataframe(records_frame(records), width="stretch", height=380, hide_index=True,
                  column_config={"Dátum": st.column_config.DateColumn(format="YYYY-MM-DD"),
                                 "Diagram aktív": st.column_config.CheckboxColumn()})
+
+
+@st.fragment(run_every=REFRESH_SECONDS)
+def render_live_table(store: ResultsStore, lot: int, lots: dict[int, WineLot]) -> None:
+    if not st.session_state.get("admin_authenticated"):
+        return
+    table_lot = choose_scope("Megjelenített tételek", lot, lots, key="admin_table_scope",
+                             on_change=reset_table_page)
+    try:
+        total, active = store.counts(table_lot)
+    except DatabaseError:
+        st.error("A táblázat most nem tölthető be.")
+        return
+    render_table(store, table_lot, total, active)
 
 
 def clear_prepared_export() -> None:
@@ -176,7 +177,7 @@ def render_exports(store: ResultsStore, lot: int, lots: dict[int, WineLot]) -> N
         st.error("A korábbi kérdőív jelölései most nem tölthetők be.")
 
 
-@st.fragment(run_every=3)
+@st.fragment(run_every=REFRESH_SECONDS)
 def render_live_charts(store: ResultsStore, lot: int) -> None:
     if not st.session_state.get("admin_authenticated"):
         return
@@ -222,7 +223,18 @@ def render_admin() -> None:
         return
 
     with st.container(key="geoterroir-admin"):
-        st.html('<a class="dg-admin-brand" href="?" aria-label="Vissza a kóstolóhoz">GEOTerroir</a>')
+        if st.session_state.get("admin_section") not in SECTIONS:
+            st.session_state.pop("admin_section", None)
+        with st.container(key="dg-admin-header"):
+            brand, navigation = st.columns([1.1, 2], gap="small", vertical_alignment="center")
+            with brand:
+                st.html('<a class="dg-admin-brand" href="?" aria-label="Vissza a kóstolóhoz">'
+                        'GeoTerroir Kutatócsoport</a>')
+            with navigation, st.container(horizontal=True, horizontal_alignment="right", key="dg-admin-navigation"):
+                section = st.segmented_control(
+                    "Adminisztrációs nézet", SECTIONS, default="Diagramok", required=True,
+                    key="admin_section", label_visibility="collapsed", wrap=True,
+                )
         heading, actions = st.columns([3, 2], gap="small", vertical_alignment="center")
         heading.title("Kóstolási eredmények")
         with actions, st.container(horizontal=True, horizontal_alignment="right", gap="small"):
@@ -241,29 +253,15 @@ def render_admin() -> None:
         lot = st.session_state.get("admin_lot", 1)
         if lot not in LOTS:
             lot = 1
-        render_lot_bar(store, lot)
-        graphs, table, exports, archive = st.tabs(
-            ("Diagramok", "Értékelések", "Exportálás", "Archiválás"),
-            key="admin_section", on_change="rerun",
-        )
-        if graphs.open:
-            with graphs:
-                render_live_charts(store, lot)
-        if table.open:
-            with table:
-                table_lot = choose_scope("Megjelenített tételek", lot, lots, key="admin_table_scope",
-                                         on_change=reset_table_page)
-                try:
-                    total, active = store.counts(table_lot)
-                except DatabaseError:
-                    st.error("A táblázat most nem tölthető be.")
-                else:
-                    render_table(store, table_lot, total, active)
-        if exports.open:
-            with exports:
-                render_exports(store, lot, lots)
-        if archive.open:
-            with archive, st.container(border=True):
+        render_lot_bar(lot)
+        if section == "Diagramok":
+            render_live_charts(store, lot)
+        elif section == "Értékelések":
+            render_live_table(store, lot, lots)
+        elif section == "Exportálás":
+            render_exports(store, lot, lots)
+        elif section == "Archiválás":
+            with st.container(border=True):
                 st.subheader("Szavazatok törlése a diagramokból")
                 st.caption("Az archivált értékelések továbbra is megjelennek a történeti táblázatban és az exportokban.")
                 archive_lot = choose_scope("Archiválandó tételek", lot, lots, key="admin_archive_scope")
