@@ -35,17 +35,17 @@ SENSORY_QUESTIONS = (
 )
 
 AROMAS = {
-    "florális": "akác, kamilla, bodza, rózsa, ibolya, virág",
-    "zöld gyümölcs": "zöldalma, egres, körte, szőlő",
-    "citrusféle": "citrom, lime, narancs, grapefruit",
-    "csonthéjas": "őszibarack, sárgabarack, nektarin",
-    "trópusi": "banán, licsi, mangó, dinnye, ananász, maracuja",
-    "piros bogyós": "ribizli, vörösáfonya, málna, eper, meggy, cseresznye",
-    "fekete bogyós": "feketeribizli, szeder, kékáfonya, kései meggy, szilva",
-    "fűszeres": "fűszer, fekete bors, fehér bors, édesgyökér",
-    "füves": "zöldpaprika, fű, paradicsomlevél, spárga, borsó",
-    "gyógynövényes": "eukaliptusz, menta, édeskömény, kapor",
-    "hordós": "pirítós, vaj, vanília, karamella, fa, füst stb.",
+    "Florális": "akác, kamilla, bodza, rózsa, ibolya, virág",
+    "Zöld gyümölcs": "zöldalma, egres, körte, szőlő",
+    "Citrusféle": "citrom, lime, narancs, grapefruit",
+    "Csonthéjas": "őszibarack, sárgabarack, nektarin",
+    "Trópusi": "banán, licsi, mangó, dinnye, ananász, maracuja",
+    "Piros bogyós": "ribizli, vörösáfonya, málna, eper, meggy, cseresznye",
+    "Fekete bogyós": "feketeribizli, szeder, kékáfonya, kései meggy, szilva",
+    "Fűszeres": "fűszer, fekete bors, fehér bors, édesgyökér",
+    "Füves": "zöldpaprika, fű, paradicsomlevél, spárga, borsó",
+    "Gyógynövényes": "eukaliptusz, menta, édeskömény, kapor",
+    "Hordós": "pirítós, vaj, vanília, karamella, fa, füst stb.",
 }
 TECHNIQUES = ("Reduktív", "Oxidatív")
 BALANCES = ("Egyensúlyos", "Nem egyensúlyos")
@@ -53,46 +53,46 @@ BALANCES = ("Egyensúlyos", "Nem egyensúlyos")
 WHITE_VARIETIES = {
     "Illatos": (
         "Melyik illatos fajta lehet?",
-        ("Irsai Olivér", "Cserszegi Fűszeres", "Sárgamuskotály", "Tramini", "Sauvignon Blanc"),
+        ("Cserszegi Fűszeres", "Irsai Olivér", "Sauvignon Blanc", "Sárgamuskotály", "Tramini"),
     ),
     "Nem illatos": (
         "Melyik nem illatos fajta lehet?",
-        ("Furmint", "Hárslevelű", "Olaszrizling", "Rajnai Rizling", "Chardonnay"),
+        ("Chardonnay", "Furmint", "Hárslevelű", "Olaszrizling", "Rajnai Rizling"),
     ),
 }
 RED_VARIETIES = {
     "Világfajta": (
         "Melyik világfajta lehet?",
-        ("Cabernet Sauvignon", "Cabernet Franc", "Merlot", "Pinot Noir", "Syrah / Shiraz"),
+        ("Cabernet Franc", "Cabernet Sauvignon", "Merlot", "Pinot Noir", "Syrah / Shiraz"),
     ),
     "Kárpát-medencei": (
         "Melyik Kárpát-medencei fajta lehet?",
-        ("Kékfrankos", "Kadarka", "Portugieser", "Feketeleányka", "Bikavér"),
+        ("Bikavér", "Feketeleányka", "Kékfrankos", "Kadarka", "Portugieser"),
     ),
 }
 REGIONS = (
-    "Soproni borvidék",
-    "Somlói borvidék",
-    "Zalai borvidék",
-    "Balaton-felvidéki borvidék",
     "Badacsonyi borvidék",
-    "Balatonfüred–Csopaki borvidék",
     "Balatonboglári borvidék",
-    "Pannonhalmi borvidék",
-    "Móri borvidék",
+    "Balaton-felvidéki borvidék",
+    "Balatonfüred–Csopaki borvidék",
+    "Bükki borvidék",
+    "Csongrádi borvidék",
+    "Egri borvidék",
     "Etyek–Budai borvidék",
-    "Neszmélyi borvidék",
-    "Tolnai borvidék",
-    "Szekszárdi borvidék",
-    "Pécsi borvidék",
-    "Villányi borvidék",
     "Hajós–Bajai borvidék",
     "Kunsági borvidék",
-    "Csongrádi borvidék",
     "Mátrai borvidék",
-    "Egri borvidék",
-    "Bükki borvidék",
+    "Móri borvidék",
+    "Neszmélyi borvidék",
+    "Pannonhalmi borvidék",
+    "Pécsi borvidék",
+    "Somlói borvidék",
+    "Soproni borvidék",
+    "Szekszárdi borvidék",
     "Tokaji borvidék",
+    "Tolnai borvidék",
+    "Villányi borvidék",
+    "Zalai borvidék",
 )
 SCORES = {
     1: ("Ihatatlan", "súlyosan és menthetetlenül hibás tétel"),
@@ -103,7 +103,7 @@ SCORES = {
     6: ("Jó", "jó ivású, kellemes mindennapi bor, hozza a fajtajellegeket"),
     7: ("Nagyon jó", "komolyabb szerkezetű bor, szép egyensúllyal"),
     8: ("Kiváló", "kiemelkedő minőség, remek egyensúly és egyedi karakter"),
-    9: ("Kivételes / Csúcsbor", "izgalmas és emlékezetes bor, tökéletes harmónia"),
+    9: ("Kivételes", "izgalmas és emlékezetes bor, tökéletes harmónia"),
     10: ("Tökéletes", "hibátlan, felejthetetlen élményt nyújtó ikonikus bor"),
 }
 
