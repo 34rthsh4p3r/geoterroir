@@ -25,7 +25,7 @@ def records_frame(records: list[dict]) -> pd.DataFrame:
         local = record["created_at"].astimezone(BUDAPEST)
         rows.append((
             local.strftime("%H-%M-%S"), local.date(), str(record["id"]), record["lot"],
-            record["wine_type"], ", ".join(record["aromas"]),
+            record["wine_type"], ", ".join(name.capitalize() for name in record["aromas"]),
             *(record[field] for field, _, _ in SENSORY_QUESTIONS), record["technique"],
             record["fragrance"], record["variety_group"], record["grape"], record["region"],
             record["balance"], record["score"], record["chart_active"],
