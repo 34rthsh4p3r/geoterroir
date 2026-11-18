@@ -12,7 +12,7 @@ def apply_styles() -> None:
             display: block;
             padding: 0 0 .5rem;
             border-bottom: 1px solid #e4dadc;
-            color: #762c47;
+            color: #9f1916;
             font-size: 1.15rem;
             font-weight: 700;
             text-decoration: none;
@@ -46,8 +46,8 @@ def apply_styles() -> None:
         }
         .st-key-geoterroir-evaluation [role="radiogroup"] label { margin-bottom: 0; }
         .st-key-geoterroir-evaluation button[data-variant="segmented_control"][role="radio"][aria-checked="true"]:not(:disabled) {
-            background-color: #762c47;
-            border-color: #762c47;
+            background-color: #9f1916;
+            border-color: #9f1916;
             color: #fff;
         }
         @media (max-width: 640px) {
@@ -76,31 +76,35 @@ def apply_styles() -> None:
             overflow-wrap: anywhere;
         }
         [role="option"] { min-height: 44px; }
-        .st-key-admin_archive button:not(:disabled) { border-color: #762c47; color: #762c47; }
+        .st-key-admin_archive button:not(:disabled) { border-color: #9f1916; color: #9f1916; }
         h3.geoterroir-chart-title {
             margin: 0;
             padding: 0;
             font-size: 1.06rem;
             line-height: 1.25;
         }
-        .dg-chart-caption, .dg-chart-empty {
-            margin: .15rem 0 0;
+        .dg-chart-empty {
+            margin: .7rem 0 0;
             color: #635760;
             font-size: .79rem;
         }
-        .dg-chart-empty { margin-top: .7rem; }
-        .dg-ranking {
+        .st-key-geoterroir-admin ul.dg-ranking {
             list-style: none;
             display: grid;
             gap: .4rem;
             padding: 0;
+            padding-inline: 0;
             margin: .65rem 0 0;
+            text-align: left;
         }
-        .dg-ranking li {
+        .st-key-geoterroir-admin .dg-ranking li {
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(2rem, 1fr) auto;
             align-items: center;
             gap: .45rem;
+            margin: 0;
+            padding: 0;
+            text-align: left;
             font-size: .83rem;
             line-height: 1.25;
         }
@@ -145,9 +149,9 @@ def apply_styles() -> None:
         .geoterroir-split li small { color: #635760; font-weight: 400; }
         .geoterroir-swatch { width: .52rem; height: .52rem; border-radius: 50%; }
         .geoterroir-score {
-            border-left: .2rem solid #762c47;
+            border-left: .2rem solid #9f1916;
             border-radius: .32rem;
-            background: #f3e8ea;
+            background: #f5e8e8;
             padding: .7rem .9rem;
             margin-block: .35rem;
         }
