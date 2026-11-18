@@ -1,6 +1,5 @@
 import streamlit as st
 
-from components.admin import render_admin
 from components.evaluation import render_evaluation
 from components.style import apply_styles
 from database import settings
@@ -8,9 +7,11 @@ from database.db import DatabaseError
 
 
 def main() -> None:
-    st.set_page_config(page_title="GEOTerroir", page_icon="🍷", layout="wide")
+    st.set_page_config(page_title="GeoTerroir", page_icon="🍷", layout="wide")
     apply_styles()
     if st.query_params.get("admin") == "1":
+        from components.admin import render_admin
+
         render_admin()
         return
 
