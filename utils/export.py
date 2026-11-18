@@ -48,7 +48,7 @@ def legacy_votes_frame(records: list[dict]) -> pd.DataFrame:
 
 def excel_bytes(frame: pd.DataFrame) -> bytes:
     workbook = Workbook(write_only=True)
-    fill = PatternFill("solid", fgColor="762C47")
+    fill = PatternFill("solid", fgColor="9F1916")
     font = Font(bold=True, color="FFFFFF")
     sheet_capacity = 1_048_575  # A fejléc is elfoglal egy sort.
     for start in range(0, max(1, len(frame)), sheet_capacity):
