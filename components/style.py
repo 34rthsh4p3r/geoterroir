@@ -55,6 +55,24 @@ def apply_styles() -> None:
             border-color: #9f1916;
             color: #fff;
         }
+        .st-key-question-grape [role="radiogroup"] {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: .5rem;
+        }
+        .st-key-geoterroir-evaluation .st-key-question-grape [role="radiogroup"] button[role="radio"]:not(:disabled) {
+            width: 100%;
+            min-width: 0;
+            margin: 0;
+            padding: .65rem .85rem;
+            border: 1px solid #dfd6d0 !important;
+            border-radius: .65rem;
+            justify-content: flex-start;
+            text-align: left;
+        }
+        .st-key-geoterroir-evaluation .st-key-question-grape [role="radiogroup"] button[aria-checked="true"]:not(:disabled) {
+            border-color: #9f1916 !important;
+        }
         @media (max-width: 640px) {
             .st-key-question-score [role="radiogroup"] {
                 display: grid;
