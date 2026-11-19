@@ -190,7 +190,11 @@ def render_evaluation() -> None:
         branch = button_choice(question, varieties, field, on_change=clear_grape)
         if branch is not None:
             grape_question, grapes = varieties[branch]
-            dropdown_choice(grape_question, sorted(grapes, key=alphabetical_key), "grape")
+            with question_card("grape"):
+                st.radio(
+                    grape_question, sorted(grapes, key=alphabetical_key), index=None,
+                    key=answer_key("grape"), on_change="ignore", width="stretch",
+                )
 
         if field == "fragrance":
             region_choice()
