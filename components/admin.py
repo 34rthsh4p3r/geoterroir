@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from hmac import compare_digest
+from pathlib import Path
 from time import monotonic
 
 import streamlit as st
@@ -17,7 +18,8 @@ TITLE = "GeoTerroir Kutatócsoport – Adminisztráció"
 ADMIN_PASSWORD = "admin26"
 PAGE_SIZE = 100
 REFRESH_SECONDS = 10
-SECTIONS = ("Diagramok", "Értékelések", "Exportálás", "Archiválás")
+SECTIONS = ("Diagramok", "Értékelések", "Exportálás", "Archiválás", "QR kód")
+QR_IMAGE = Path(__file__).resolve().parent.parent / "qrkod.png"
 ARCHIVE_SUCCESS = (
     "A szavazatokat eltávolítottuk az aktuális diagramokból. "
     "Az archivált válaszok továbbra is elérhetők az exportálható adatbázisban."
@@ -236,13 +238,21 @@ def render_admin() -> None:
                     key="admin_section", label_visibility="collapsed", wrap=True,
                 )
         heading, actions = st.columns([3, 2], gap="small", vertical_alignment="center")
-        heading.title("Kóstolási eredmények")
+        heading.title("QR kód" if section == "QR kód" else "Kóstolási eredmények")
         with actions, st.container(horizontal=True, horizontal_alignment="right", gap="small"):
             st.button("Adatok frissítése", on_click=clear_prepared_export)
             st.button("Kijelentkezés", on_click=logout)
         notice = st.session_state.pop("admin_notice", None)
         if notice:
             st.success(notice)
+        if section == "QR kód":
+            with st.container(key="dg-qr"):
+                st.html('<h2 class="dg-qr-address">GEOTERROIR.STREAMLIT.APP</h2>')
+                if QR_IMAGE.is_file():
+                    st.image(str(QR_IMAGE), width="stretch")
+                else:
+                    st.error("Hiányzik a qrkod.png kép. Töltsd fel az app.py mellé!")
+            return
         try:
             store = results_store()
             historical = store.historical_lot_types(after_lot=max(LOTS))
