@@ -20,6 +20,17 @@ def apply_styles() -> None:
             padding-bottom: .5rem;
             border-bottom: 1px solid #e4dadc;
         }
+        .st-key-dg-qr { max-width: 40rem; margin-inline: auto; }
+        h2.dg-qr-address {
+            margin: 0 0 1rem;
+            padding: 0;
+            color: #9f1916;
+            text-align: center;
+            font-size: clamp(1rem, 3.5vw, 2.25rem);
+            font-weight: 700;
+            letter-spacing: .025em;
+            overflow-wrap: anywhere;
+        }
         .st-key-geoterroir-admin h1 {
             padding: 0;
             font-size: clamp(1.65rem, 3vw, 2.3rem);
